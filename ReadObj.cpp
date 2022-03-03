@@ -26,11 +26,12 @@ struct uv
 	float v;
 };
 
-void ReadObj(string path, std::vector<vertice> &OutVertices, std::vector<uv> &OutUvs, std::vector<int> &OutFace, std::vector<int>& Outgcounts)
+void ReadObj(string path, std::vector<vertice> &OutVertices, std::vector<uv> &OutUvs, std::vector<vertice>& OutNormals, std::vector<int> &OutFace, std::vector<int>& Outgcounts)
 {
 	string s, str, s1, s2, s3, s4, s5, s6;
 	ifstream inf;
 	vertice v;
+	vertice normal;
 	uv u;
 	inf.open(path);
 
@@ -56,7 +57,12 @@ void ReadObj(string path, std::vector<vertice> &OutVertices, std::vector<uv> &Ou
 				}
 				else if (s[1] == 'n')
 				{
-					continue;
+					istringstream in(s);
+					in >> s1 >> s2 >> s3 >> s4;
+					normal.x = std::stof(s2);
+					normal.y = std::stof(s3);
+					normal.z = std::stof(s4);
+					OutNormals.push_back(normal);
 				}
 				else
 				{
@@ -150,11 +156,12 @@ int main(int argc, char** argv)
 	string suffixStr = "obj";
 	string path = rootpath + "\\" + objname;
 	std::vector<vertice> Vertices;
+	std::vector<vertice> Normals;
 	std::vector<int> face;
 	std::vector<string> filenames;
 	std::vector<int> g_counts;
 	std::vector<uv> Uvs;
-	ReadObj(path, Vertices, Uvs, face, g_counts);
+	ReadObj(path, Vertices, Uvs, Normals, face, g_counts);
 	getFiles(rootpath, filenames);
 	for (auto name : filenames)
 	{
@@ -162,18 +169,20 @@ int main(int argc, char** argv)
 		face.clear();
 		Uvs.clear();
 		g_counts.clear();
+		Normals.clear();
 		string filetype = name.substr(name.find_last_of(".") + 1);
 		transform(filetype.begin(), filetype.end(), filetype.begin(), ::tolower);
 		
 		if (filetype == suffixStr )
 		{
 			
-			ReadObj(name, Vertices, Uvs, face, g_counts);
+			ReadObj(name, Vertices, Uvs, Normals, face, g_counts);
 		}
 		printf("result\n");
 		std::cout << "read name " << name << std::endl;
 		std::cout << "verteice size " << Vertices.size() << std::endl;
 		std::cout << "face count " << face.size() << std::endl;
+		std::cout << "Normal count " << Normals.size() << std::endl;
 		std::cout << "uv count " << Uvs.size() << std::endl;
 		std::cout << "g_counts " << g_counts.size() << std::endl;
 		
